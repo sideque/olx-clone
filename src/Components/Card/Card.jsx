@@ -1,10 +1,9 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import Favorite from '../../assets/favorite.svg'
 
 const Card = ({ items }) => {
 
-    
+
 
 
     return (
@@ -28,13 +27,13 @@ const Card = ({ items }) => {
                             onClick={(e) => {
                                 e.stopPropagation(); // Prevent link navigation
                                 e.preventDefault();  // Prevent default navigation
-                                alert('Added to favorites!'); 
+                                alert('Added to favorites!');
                             }}
                         >
                             <img className='w-5' src={Favorite} alt="Favorite" />
                         </div>
 
-                        
+
                         <Link
                             to={'/details'}
                             state={{ item }}

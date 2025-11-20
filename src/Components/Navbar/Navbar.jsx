@@ -10,9 +10,7 @@ import { auth, logout } from '../Firebase/Firebase';
 
 const Navbar = (props) => {
 
-    
 
-    
 
     const [user] = useAuthState(auth);
     const { toggleModal, toggleModalSell } = props;
@@ -28,7 +26,6 @@ const Navbar = (props) => {
         <div>
 
             <nav className="fixed z-50 w-full overflow-auto p-2 pl-3 pr-3 shadow-md bg-slate-100 border-b-4 border-solid border-b-white">
-
                 <img src={logo} alt="" className='w-12' />
 
                 <div className='relative location-search ml-5'>
@@ -60,10 +57,10 @@ const Navbar = (props) => {
                         </p>
 
                         {dropdownOpen && (
-                          <div className='dropdown-menu'>
-                              <p onClick={handleLogout}>Logout</p>
-                          </div>
-                      )}
+                            <div className='dropdown-menu'>
+                                <p onClick={handleLogout}>Logout</p>
+                            </div>
+                        )}
 
 
                     </div>
@@ -76,6 +73,7 @@ const Navbar = (props) => {
                     alt=""
                 />
             </nav>
+
 
             <div className='w-full relative z-0 flex shadow-md p-2 pt-20 pl-10 pr-10 sm:pl-44 md:pr-44 sub-lists'>
                 <ul className='list-none flex items-center justify-between w-full'>
@@ -93,7 +91,7 @@ const Navbar = (props) => {
                     <li>For rent : Houses & Apartments</li>
 
 
-                    
+
                 </ul>
             </div>
 
