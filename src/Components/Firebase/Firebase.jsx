@@ -1,52 +1,51 @@
-
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signOut } from "firebase/auth";
-import { getStorage } from "firebase/storage"
-import { getFirestore, collection, getDocs } from "firebase/firestore"
+import { getAuth, signOut, GoogleAuthProvider } from "firebase/auth"; 
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_API_KEY,
-  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_APP_ID
+  apiKey: "AIzaSyBZcCYW47X24OCYJXFYZSvAKysVX1JPz9M",
+  authDomain: "olx-clone-81cda.firebaseapp.com",
+  projectId: "olx-clone-81cda",
+  storageBucket: "olx-clone-81cda.firebasestorage.app",
+  messagingSenderId: "107953883664",
+  appId: "1:107953883664:web:e3c05dd3abdb4d74e15895"
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app)
-const provider = new GoogleAuthProvider()
-const storage = getStorage()
-const firestore = getFirestore()
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider(); 
+const storage = getStorage(app);
+const firestore = getFirestore(app);
 
-
-
-
-const fetchFromFirestore = async()=>{
-
-    try{
-        const productsCollection = collection(firestore,'products')
-        const productsSnapshot = await getDocs(productsCollection)
-        const productList = productsSnapshot.docs.map(doc=>({
-
-            id:doc.id,
-            ...doc.data()
-        }))
-        console.log('Fetched products from Firestore',productList)
-        return productList
-    }catch(error){
-        console.log('error fetching products from Firestore:',error)
-        return []
-    }
-
+// Fetch products
+const fetchFromFirestore = async () => {
+  try {
+    const productsCollection = collection(firestore, 'products');
+    const productSnapshot = await getDocs(productsCollection);
+    const productList = productSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    console.log("Fetched products from Firestore", productList);
+    return productList;
+  } catch (error) {
+    console.error("Error fetching products from Firestore: ", error);
+    return [];
+  }
 }
 
-const logout = ()=>{
-    signOut(auth)
+// Logout
+const logout = () => {
+  signOut(auth);
 }
 
-export{
-    auth,provider,storage,firestore,fetchFromFirestore,logout
+export {
+  auth,
+  provider,
+  storage,
+  firestore,
+  logout,
+  fetchFromFirestore
 }
