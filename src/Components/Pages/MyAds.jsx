@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import Navbar from '../Navbar/Navbar'
-import Login from '../Modal/Login'
-import Sell from '../Modal/Sell'
-import Footer from '../Footer/Footer'
-import { UserAuth } from '../Context/Auth'
+import { useEffect, useState } from "react";
+import Navbar from "../Navbar/Navbar";
+import Login from "../Modal/Login";
+import Sell from "../Modal/Sell";
+import Footer from "../Footer/Footer";
+import swal from "sweetalert";
+import { UserAuth } from "../Context/Auth";
 import {
   collection,
   deleteDoc,
@@ -12,143 +13,141 @@ import {
   query,
   updateDoc,
   where,
-} from 'firebase/firestore'
-import { firestore } from '../Firebase/Firebase'
-import { ItemsContext } from '../Context/Item'
+} from "firebase/firestore";
+import { firestore } from "../Firebase/Firebase";
+import { ItemsContext } from "../Context/Item";
 
-const emptyForm = { title: '', price: '', category: '', description: '' }
+const emptyForm = { title: "", price: "", category: "", description: "" };
 
 const MyAds = () => {
-  const { user } = UserAuth()
-  const itemsContext = ItemsContext()
+  const { user } = UserAuth();
+  const itemsContext = ItemsContext();
 
-  const [openModal, setModal] = useState(false)
-  const [openModalSell, setModalSell] = useState(false)
-  const toggleModal = () => setModal((prev) => !prev)
-  const toggleModalSell = () => setModalSell((prev) => !prev)
+  const [openModal, setModal] = useState(false);
+  const [openModalSell, setModalSell] = useState(false);
+  const toggleModal = () => setModal((prev) => !prev);
+  const toggleModalSell = () => setModalSell((prev) => !prev);
 
-  const [ads, setAds] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
-  const [editErrors, setEditErrors] = useState({})
+  const [ads, setAds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [editErrors, setEditErrors] = useState({});
 
-  const hasAds = ads.length > 0
+  const hasAds = ads.length > 0;
 
   const fetchUserAds = async () => {
     if (!user) {
-      setLoading(false)
-      setAds([])
-      return
+      setLoading(false);
+      setAds([]);
+      return;
     }
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError("");
     try {
       const productsQuery = query(
-        collection(firestore, 'products'),
-        where('userId', '==', user.uid)
-      )
-      const snapshot = await getDocs(productsQuery)
+        collection(firestore, "products"),
+        where("userId", "==", user.uid)
+      );
+      const snapshot = await getDocs(productsQuery);
       const userAds = snapshot.docs.map((docSnap) => ({
         id: docSnap.id,
         ...docSnap.data(),
-      }))
-      setAds(userAds)
+      }));
+      setAds(userAds);
     } catch (err) {
-      console.log(err)
-      setError('Failed to load your ads. Please try again later.')
+      console.log(err);
+      setError("Failed to load your ads. Please try again later.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUserAds()
+    fetchUserAds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user]);
 
   const startEditing = (ad) => {
-    setEditingId(ad.id)
+    setEditingId(ad.id);
     setEditForm({
-      title: ad.title || '',
-      price: ad.price || '',
-      category: ad.category || '',
-      description: ad.description || '',
-    })
-    setEditErrors({})
-  }
+      title: ad.title || "",
+      price: ad.price || "",
+      category: ad.category || "",
+      description: ad.description || "",
+    });
+    setEditErrors({});
+  };
 
   const cancelEditing = () => {
-    setEditingId(null)
-    setEditForm(emptyForm)
-    setEditErrors({})
-  }
+    setEditingId(null);
+    setEditForm(emptyForm);
+    setEditErrors({});
+  };
 
   const handleEditChange = (field, value) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }))
+    setEditForm((prev) => ({ ...prev, [field]: value }));
     if (editErrors[field]) {
-      const message = validateEditField(field, value)
+      const message = validateEditField(field, value);
       setEditErrors((prev) => {
-        const updated = { ...prev }
+        const updated = { ...prev };
         if (message) {
-          updated[field] = message
+          updated[field] = message;
         } else {
-          delete updated[field]
+          delete updated[field];
         }
-        return updated
-      })
+        return updated;
+      });
     }
-  }
+  };
 
   const validateEditField = (field, value) => {
-    const trimmedValue =
-      typeof value === 'string' ? value.trim() : value ?? ''
+    const trimmedValue = typeof value === "string" ? value.trim() : value ?? "";
 
     switch (field) {
-      case 'title':
-        if (!trimmedValue) return 'Title is required'
+      case "title":
+        if (!trimmedValue) return "Title is required";
         if (trimmedValue.length < 3)
-          return 'Title must be at least 3 characters'
-        return ''
-      case 'category':
-        if (!trimmedValue) return 'Category is required'
-        return ''
-      case 'price':
-        if (!trimmedValue) return 'Price is required'
-        if (isNaN(trimmedValue)) return 'Price must be numeric'
-        if (Number(trimmedValue) <= 0)
-          return 'Price must be greater than 0'
-        return ''
-      case 'description':
-        if (!trimmedValue) return 'Description is required'
+          return "Title must be at least 3 characters";
+        return "";
+      case "category":
+        if (!trimmedValue) return "Category is required";
+        return "";
+      case "price":
+        if (!trimmedValue) return "Price is required";
+        if (isNaN(trimmedValue)) return "Price must be numeric";
+        if (Number(trimmedValue) <= 0) return "Price must be greater than 0";
+        return "";
+      case "description":
+        if (!trimmedValue) return "Description is required";
         if (trimmedValue.length < 10)
-          return 'Description must be at least 10 characters'
-        return ''
+          return "Description must be at least 10 characters";
+        return "";
       default:
-        return ''
+        return "";
     }
-  }
+  };
 
   const validateEditForm = () => {
-    const fields = ['title', 'category', 'price', 'description']
+    const fields = ["title", "category", "price", "description"];
     const collectedErrors = fields.reduce((acc, field) => {
-      const message = validateEditField(field, editForm[field])
+      const message = validateEditField(field, editForm[field]);
       if (message) {
-        acc[field] = message
+        acc[field] = message;
       }
-      return acc
-    }, {})
-    setEditErrors(collectedErrors)
-    return Object.keys(collectedErrors).length === 0
-  }
+      return acc;
+    }, {});
+    setEditErrors(collectedErrors);
+    return Object.keys(collectedErrors).length === 0;
+  };
 
   const handleUpdate = async () => {
-    if (!editingId) return
+    if (!editingId) return;
 
     if (!validateEditForm()) {
-      return
+      return;
     }
 
     const trimmed = {
@@ -156,17 +155,17 @@ const MyAds = () => {
       price: editForm.price.toString().trim(),
       category: editForm.category.trim(),
       description: editForm.description.trim(),
-    }
+    };
 
-    setSaving(true)
+    setSaving(true);
     try {
-      const docRef = doc(firestore, 'products', editingId)
+      const docRef = doc(firestore, "products", editingId);
       await updateDoc(docRef, {
         title: trimmed.title,
         category: trimmed.category,
         price: Number(trimmed.price),
         description: trimmed.description,
-      })
+      });
 
       setAds((prev) =>
         prev.map((ad) =>
@@ -180,28 +179,40 @@ const MyAds = () => {
               }
             : ad
         )
-      )
+      );
 
-      cancelEditing()
+      cancelEditing();
     } catch (err) {
-      console.log(err)
-      alert('Failed to update the ad. Please try again.')
+      console.log(err);
+      alert("Failed to update the ad. Please try again.");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleDelete = async (adId) => {
-    const confirmed = window.confirm('Are you sure you want to delete this ad?')
-    if (!confirmed) return
-    try {
-      await deleteDoc(doc(firestore, 'products', adId))
-      setAds((prev) => prev.filter((ad) => ad.id !== adId))
-    } catch (err) {
-      console.log(err)
-      alert('Failed to delete the ad. Please try again.')
-    }
-  }
+    // const confirmed = window.confirm('Are you sure you want to delete this ad?');
+    swal({
+      title: "Are you sure ?",
+      text: "Once deleted, you will not be able to recover this imaginary file!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((confirmed) => {
+      if (confirmed) {
+        swal("Your imaginary file has been deleted!", {
+          icon: "success",
+        });
+      } else if (!confirmed) return;
+      try {
+        deleteDoc(doc(firestore, "products", adId));
+        setAds((prev) => prev.filter((ad) => ad.id !== adId));
+      } catch (err) {
+        console.log(err);
+        alert("Failed to delete the ad. Please try again.");
+      }
+    });
+  };
 
   const renderContent = () => {
     if (!user) {
@@ -212,44 +223,46 @@ const MyAds = () => {
           </p>
           <button
             className="mt-4 px-6 py-2 rounded-md text-white"
-            style={{ backgroundColor: '#002f34' }}
+            style={{ backgroundColor: "#002f34" }}
             onClick={toggleModal}
           >
             Login
           </button>
         </div>
-      )
+      );
     }
 
     if (loading) {
       return (
         <div className="text-center py-10 text-gray-600">Loading your ads…</div>
-      )
+      );
     }
 
     if (error) {
-      return <p className="text-center text-red-600 py-6">{error}</p>
+      return <p className="text-center text-red-600 py-6">{error}</p>;
     }
 
     if (!hasAds) {
       return (
         <div className="bg-white border border-gray-200 rounded-md p-8 text-center">
-          <p className="text-lg text-gray-700">You have not posted any ads yet.</p>
+          <p className="text-lg text-gray-700">
+            You have not posted any ads yet.
+          </p>
           <button
             className="mt-4 px-6 py-2 rounded-md text-white"
-            style={{ backgroundColor: '#002f34' }}
+            style={{ backgroundColor: "#002f34" }}
             onClick={toggleModalSell}
           >
             Sell an item
           </button>
         </div>
-      )
+      );
     }
 
     return (
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {ads.map((ad) => {
-          const isEditing = editingId === ad.id
+          const isEditing = editingId === ad.id;
           return (
             <div
               key={ad.id}
@@ -257,7 +270,7 @@ const MyAds = () => {
             >
               <div className="w-full h-48 bg-white flex items-center justify-center border-b border-gray-200">
                 <img
-                  src={ad.imageUrl || 'https://via.placeholder.com/150'}
+                  src={ad.imageUrl || "https://via.placeholder.com/150"}
                   alt={ad.title}
                   className="h-40 object-contain"
                 />
@@ -268,11 +281,13 @@ const MyAds = () => {
                     <div>
                       <input
                         className={`w-full border rounded-md p-2 focus:outline-none focus:border-teal-400 ${
-                          editErrors.title ? 'border-red-500' : 'border-gray-300'
+                          editErrors.title
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                         value={editForm.title}
                         onChange={(e) =>
-                          handleEditChange('title', e.target.value)
+                          handleEditChange("title", e.target.value)
                         }
                         placeholder="Title"
                       />
@@ -286,12 +301,12 @@ const MyAds = () => {
                       <input
                         className={`w-full border rounded-md p-2 focus:outline-none focus:border-teal-400 ${
                           editErrors.category
-                            ? 'border-red-500'
-                            : 'border-gray-300'
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                         value={editForm.category}
                         onChange={(e) =>
-                          handleEditChange('category', e.target.value)
+                          handleEditChange("category", e.target.value)
                         }
                         placeholder="Category"
                       />
@@ -304,11 +319,13 @@ const MyAds = () => {
                     <div>
                       <input
                         className={`w-full border rounded-md p-2 focus:outline-none focus:border-teal-400 ${
-                          editErrors.price ? 'border-red-500' : 'border-gray-300'
+                          editErrors.price
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                         value={editForm.price}
                         onChange={(e) =>
-                          handleEditChange('price', e.target.value)
+                          handleEditChange("price", e.target.value)
                         }
                         placeholder="Price"
                       />
@@ -322,12 +339,12 @@ const MyAds = () => {
                       <textarea
                         className={`w-full border rounded-md p-2 focus:outline-none focus:border-teal-400 min-h-20 ${
                           editErrors.description
-                            ? 'border-red-500'
-                            : 'border-gray-300'
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                         value={editForm.description}
                         onChange={(e) =>
-                          handleEditChange('description', e.target.value)
+                          handleEditChange("description", e.target.value)
                         }
                         placeholder="Description"
                       />
@@ -341,7 +358,10 @@ const MyAds = () => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-bold" style={{ color: '#002f34' }}>
+                      <h3
+                        className="text-xl font-bold"
+                        style={{ color: "#002f34" }}
+                      >
                         Rs {ad.price}
                       </h3>
                       <span className="text-xs uppercase tracking-wide text-gray-500">
@@ -365,11 +385,11 @@ const MyAds = () => {
                     <>
                       <button
                         className="flex-1 rounded-md px-3 py-2 text-white"
-                        style={{ backgroundColor: '#002f34' }}
+                        style={{ backgroundColor: "#002f34" }}
                         onClick={handleUpdate}
                         disabled={saving}
                       >
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? "Saving..." : "Save"}
                       </button>
                       <button
                         className="flex-1 rounded-md px-3 py-2 border border-gray-300 text-gray-600"
@@ -389,7 +409,7 @@ const MyAds = () => {
                       </button>
                       <button
                         className="flex-1 rounded-md px-3 py-2 text-white"
-                        style={{ backgroundColor: '#b3261e' }}
+                        style={{ backgroundColor: "#b3261e" }}
                         onClick={() => handleDelete(ad.id)}
                       >
                         Delete
@@ -399,11 +419,11 @@ const MyAds = () => {
                 </div>
               </div>
             </div>
-          )
+          );
         })}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div>
@@ -418,7 +438,7 @@ const MyAds = () => {
       <section className="p-10 px-5 sm:px-10 lg:px-40 pt-28 min-h-screen bg-slate-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#002f34' }}>
+            <h1 className="text-2xl font-bold" style={{ color: "#002f34" }}>
               My Ads
             </h1>
             <p className="text-gray-600 text-sm pt-1">
@@ -437,8 +457,7 @@ const MyAds = () => {
 
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default MyAds
-
+export default MyAds;
