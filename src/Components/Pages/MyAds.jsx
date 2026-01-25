@@ -49,7 +49,7 @@ const MyAds = () => {
     try {
       const productsQuery = query(
         collection(firestore, "products"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
       );
       const snapshot = await getDocs(productsQuery);
       const userAds = snapshot.docs.map((docSnap) => ({
@@ -104,7 +104,8 @@ const MyAds = () => {
   };
 
   const validateEditField = (field, value) => {
-    const trimmedValue = typeof value === "string" ? value.trim() : value ?? "";
+    const trimmedValue =
+      typeof value === "string" ? value.trim() : (value ?? "");
 
     switch (field) {
       case "title":
@@ -177,8 +178,8 @@ const MyAds = () => {
                 price: Number(trimmed.price),
                 description: trimmed.description,
               }
-            : ad
-        )
+            : ad,
+        ),
       );
 
       cancelEditing();

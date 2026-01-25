@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react";
 
 const Input = ({
   name,
-  type = 'text',
+  type = "text",
   value,
   setInput,
   placeholder,
@@ -10,8 +10,8 @@ const Input = ({
   onBlur,
 }) => {
   const handleChange = (event) => {
-    setInput(event.target.value)
-  }
+    setInput(event.target.value);
+  };
 
   return (
     <div className="pt-2 w-full ralative">
@@ -26,7 +26,7 @@ const Input = ({
           aria-invalid={!!error}
           aria-describedby={error ? `${name}-error` : undefined}
           className={`w-full border-2 rounded-md p-3 pt-4 pb-2 focus:outline-none peer ${
-            error ? 'border-red-500' : 'border-black'
+            error ? "border-red-500" : "border-black"
           }`}
           placeholder=" "
         />
@@ -43,7 +43,7 @@ const Input = ({
         </p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Input
+export default Input;
